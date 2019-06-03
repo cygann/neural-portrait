@@ -5,7 +5,17 @@ import cv2
 import numpy as np
 
 def get_features_mask(img, doEnlarge=True, scale=15):
-    """ Returns a binary image mask for the input image's facial features. """
+    """ 
+    Returns a binary image mask for the input image's facial features. 
+    
+    Params:
+    img - input image of face to segment facial features from
+    doEnlarge - determines if feature masks should be larger than true values
+    scale - pixels to enlarge feature by in all directions
+    
+    Out:
+    mask - numpy array of image mask
+    """
     fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, flip_input=False)
     preds = fa.get_landmarks(img) 
     
