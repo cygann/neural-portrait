@@ -14,18 +14,16 @@ import scipy.misc
 from stylize import stylize
 
 # portrait aware defaults
-BG_STYLE_WEIGHT = 2e2        # portarit aware paper recommends 2e2
+BG_STYLE_WEIGHT = 2e2        # portarit aware paper recommends 2e4
 BG_STYLE_WEIGHT_BLEND = 1
-BG_LAYER_WEIGHT_EXP = 1.0
-
-FACE_STYLE_WEIGHT = 2e4
+BG_LAYER_WEIGHT_EXP = 1
 
 # default arguments
 CONTENT_WEIGHT = 5e0         # portrait aware recommends 5e0, original code uses 5e0
 CONTENT_WEIGHT_BLEND = 1
-STYLE_WEIGHT = 2e2           # portrait aware recommends 2e2, original code uses 5e2
+STYLE_WEIGHT = 5e2          # portrait aware recommends 2e2, original code uses 5e2
 TV_WEIGHT = 1e2
-STYLE_LAYER_WEIGHT_EXP = 1.0
+STYLE_LAYER_WEIGHT_EXP = 0.5
 LEARNING_RATE = 1e1
 BETA1 = 0.9
 BETA2 = 0.999
@@ -225,7 +223,7 @@ def main():
     style_bg_blend_weights = 1.0
     
     # create the masked image  
-    mask_image = mask_imread('imgs/masks/gatsby_mask.png', 'imgs/input/gatsby.jpg')
+    mask_image = mask_imread('imgs/masks/lupita_mask2.png', 'imgs/input/lupita2.jpg')
     
     loss_arrs = None
     for iteration, image, loss_vals in stylize(
@@ -233,8 +231,6 @@ def main():
         style_weight_bg=BG_STYLE_WEIGHT,
         bg_weight_blend=style_bg_blend_weights,
         background_layer_weight_exp=BG_LAYER_WEIGHT_EXP,
-        style_weight_face=FACE_STYLE_WEIGHT,
-        face_weight_blend=1.0,
         network=options.network,
         initial=initial,
         initial_noiseblend=options.initial_noiseblend,
@@ -311,11 +307,7 @@ def mask_imread(mask_path, content_path):
     mask = np.where(mask < 255, mask, 0)
     mask = mask.astype(int)
     mask = mask[:,:,0]
-    #print(mask)
 
-#     masked_img = mask * content_image
-    
-#     #img = scipy.misc.imread(path).astype(np.float)
     if len(mask.shape) == 2:
         # grayscale
         mask = np.dstack((mask, mask, mask))
@@ -323,10 +315,6 @@ def mask_imread(mask_path, content_path):
         # PNG with alpha channel
         mask = mask[:,:,:3]
     imsave('mask_test.jpg', mask)
-    
-    mask2 = mask[:,:,0]
-    print(mask2)
-    print(mask2.shape)
 
     #return masked_img
     return mask

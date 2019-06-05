@@ -18,9 +18,11 @@ CONTENT_LAYERS = ['relu4_2']
 STYLE_LAYERS = ['relu3_1', 'relu4_1', 'relu5_1']
 BACKGROUND_LAYERS = ['relu1_1', 'relu2_1', 'relu3_1']
 
-STYLE_BG_LAYERS = STYLE_LAYERS + BACKGROUND_LAYERS
-FACE_LAYERS = ['relu4_2', 'relu5_2']
+# CONTENT_LAYERS = ['relu4_2']
+# STYLE_LAYERS = ['relu4_1', 'relu5_1']
+# BACKGROUND_LAYERS = ['relu1_1', 'relu2_1', 'relu3_1']
 
+STYLE_BG_LAYERS = ['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1']
 
 try:
     reduce
@@ -41,8 +43,6 @@ def stylize(masked_img,
             style_weight_bg,
             bg_weight_blend,
             background_layer_weight_exp,
-            style_weight_face,
-            face_weight_blend,
             network, 
             initial, 
             initial_noiseblend, 
@@ -189,25 +189,15 @@ def stylize(masked_img,
         bg_style_losses = []
         for style_layer in BACKGROUND_LAYERS:
             layer = mask_net[style_layer]
-            layer_orig = net[style_layer]
             print('layer', layer.shape)
             _, height, width, number = map(lambda i: i.value, layer.get_shape())
-#             size = height * width * number
-#             feats = tf.reshape(layer, (-1, number))
-              
-#             scaled_mask = scipy.misc.imresize(mask, (height, width))
-#             scaled_mask = np.reshape(scaled_mask, height * width)
-# #             print('scaled_mask', scaled_mask.shape)
-#             mask_stack = np.tile(scaled_mask, (number, 1)).T
-# #             print('mask_stack', mask_stack.shape)
-#             feats = feats * mask_stack
             
             feats = tf.reshape(layer, (-1, number))
             gram = tf.matmul(tf.transpose(feats), feats) / size
             style_gram = style_features[0][style_layer]
-            bg_style_losses.append(style_bg_layers_weights[style_layer] * 2 * tf.nn.l2_loss(gram - style_gram) / style_gram.size)
+            bg_style_losses.append(style_bg_layers_weights[style_layer] * 2 * tf.nn.l2_loss(gram - style_gram) / ( 4 * style_gram.size))
             
-        bg_loss += style_weight_bg * bg_weight_blend * reduce(tf.add, bg_style_losses)
+        bg_loss += style_weight_bg * reduce(tf.add, bg_style_losses)
         
        
             

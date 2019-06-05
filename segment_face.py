@@ -3,6 +3,13 @@ from skimage import io
 import matplotlib.pyplot as plt;
 import cv2
 import numpy as np
+from scipy.ndimage.filters import gaussian_filter
+
+def create_background_mask(filename, output_name):
+    img = io.imread(filename)
+    newimg = np.where(img == 0, img, 255)
+    io.imsave(output_name, newimg)
+
 
 def get_features_mask(img, doEnlarge=True, scale=15):
     """ 
@@ -47,7 +54,14 @@ def get_features_mask(img, doEnlarge=True, scale=15):
     cv2.fillConvexPoly(mask, np.int32(brow_left), (255, 255, 255))
     cv2.fillConvexPoly(mask, np.int32(brow_right), (255, 255, 255))
     
-    return mask
+    # save the binary mask as an image
+    mask = mask.astype(np.uint8) # to suppress lossy conversion warning
+    mask_image = io.imsave('./temp.jpg', mask)
+    
+    # open the image as grayscale, then blur it
+    mask_grayscale = io.imread('./temp.jpg',as_gray=True) 
+    blurred_mask = gaussian_filter(mask_grayscale, sigma=7)
+    return blurred_mask
     
     
 def enlarge(feature, scale=15):
